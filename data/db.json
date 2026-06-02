@@ -1,0 +1,468 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "name": "Alex Carter",
+      "email": "admin@demo.com",
+      "passwordHash": "demo1234",
+      "role": "admin",
+      "avatar": "AC",
+      "createdAt": "2026-01-01T00:00:00Z"
+    },
+    {
+      "id": "u2",
+      "name": "Jordan Lee",
+      "email": "pm@demo.com",
+      "passwordHash": "demo1234",
+      "role": "project_manager",
+      "avatar": "JL",
+      "createdAt": "2026-01-02T00:00:00Z"
+    },
+    {
+      "id": "u3",
+      "name": "Sam Rivera",
+      "email": "member1@demo.com",
+      "passwordHash": "demo1234",
+      "role": "team_member",
+      "avatar": "SR",
+      "createdAt": "2026-01-03T00:00:00Z"
+    },
+    {
+      "id": "u4",
+      "name": "Morgan Patel",
+      "email": "member2@demo.com",
+      "passwordHash": "demo1234",
+      "role": "team_member",
+      "avatar": "MP",
+      "createdAt": "2026-01-04T00:00:00Z"
+    },
+    {
+      "id": "qkbf0f4fmpwts8o1",
+      "name": "Abdullah",
+      "email": "zubaer@gmail.com",
+      "passwordHash": "demo1234",
+      "role": "project_manager",
+      "avatar": "A",
+      "createdAt": "2026-06-02T16:01:52.609Z"
+    },
+    {
+      "id": "7bpyfemmmpwtsmz8",
+      "name": "Dave Miller",
+      "email": "dave@demo.com",
+      "passwordHash": "demo1234",
+      "role": "team_member",
+      "avatar": "DM",
+      "createdAt": "2026-06-02T16:02:11.156Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "name": "E-Commerce Platform",
+      "description": "Build a full-featured e-commerce platform with cart, checkout, and payment integration.",
+      "deadline": "2026-07-30T00:00:00Z",
+      "status": "active",
+      "createdBy": "u1",
+      "members": [
+        "u1",
+        "u2",
+        "u3",
+        "u4"
+      ],
+      "createdAt": "2026-01-10T08:00:00Z",
+      "updatedAt": "2026-01-10T08:00:00Z"
+    },
+    {
+      "id": "p2",
+      "name": "Mobile App Redesign",
+      "description": "Redesign the mobile app with a fresh UI and improved UX flows.",
+      "deadline": "2026-06-15T00:00:00Z",
+      "status": "active",
+      "createdBy": "u2",
+      "members": [
+        "u2",
+        "u3"
+      ],
+      "createdAt": "2026-02-01T08:00:00Z",
+      "updatedAt": "2026-02-01T08:00:00Z"
+    },
+    {
+      "id": "p3",
+      "name": "Admin Dashboard",
+      "description": "Internal admin dashboard for managing users, reports, and system settings.",
+      "deadline": "2026-05-01T00:00:00Z",
+      "status": "completed",
+      "createdBy": "u1",
+      "members": [
+        "u1",
+        "u4"
+      ],
+      "createdAt": "2026-01-15T08:00:00Z",
+      "updatedAt": "2026-04-28T08:00:00Z"
+    },
+    {
+      "id": "p4",
+      "name": "API Integration Suite",
+      "description": "Integrate third-party APIs for payment, shipping, and analytics.",
+      "deadline": "2026-08-20T00:00:00Z",
+      "status": "on_hold",
+      "createdBy": "u2",
+      "members": [
+        "u2",
+        "u4"
+      ],
+      "createdAt": "2026-03-01T08:00:00Z",
+      "updatedAt": "2026-03-05T08:00:00Z"
+    },
+    {
+      "id": "3ej016ifmpws9pzl",
+      "name": "Ecommerce Project",
+      "description": "kasflaskdhflsafhlasdhfasklfjhl",
+      "deadline": "2026-06-12T00:00:00.000Z",
+      "status": "on_hold",
+      "createdBy": "u2",
+      "members": [],
+      "createdAt": "2026-06-02T15:19:28.977Z",
+      "updatedAt": "2026-06-02T15:19:28.977Z"
+    },
+    {
+      "id": "8uo74n7kmpwthke1",
+      "name": "hgfjy",
+      "description": "jytit",
+      "deadline": "2026-06-11T00:00:00.000Z",
+      "status": "on_hold",
+      "createdBy": "u2",
+      "members": [],
+      "createdAt": "2026-06-02T15:53:34.585Z",
+      "updatedAt": "2026-06-02T15:53:34.585Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "projectId": "p1",
+      "title": "Setup API Architecture",
+      "description": "Design and implement the REST API architecture for the e-commerce backend.",
+      "assignee": "u3",
+      "dueDate": "2026-06-20T00:00:00Z",
+      "priority": "high",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u1",
+      "createdAt": "2026-01-10T09:00:00Z",
+      "updatedAt": "2026-06-02T15:21:32.324Z"
+    },
+    {
+      "id": "t2",
+      "projectId": "p1",
+      "title": "Payment Gateway Integration",
+      "description": "Integrate Stripe payment gateway with webhooks for order processing.",
+      "assignee": "u2",
+      "dueDate": "2026-07-10T00:00:00Z",
+      "priority": "high",
+      "status": "in_progress",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u1",
+      "createdAt": "2026-01-11T09:00:00Z",
+      "updatedAt": "2026-06-02T15:21:26.254Z"
+    },
+    {
+      "id": "t3",
+      "projectId": "p1",
+      "title": "Product Catalog UI",
+      "description": "Build the product listing page with filtering and search functionality.",
+      "assignee": "u4",
+      "dueDate": "2026-06-25T00:00:00Z",
+      "priority": "medium",
+      "status": "in_progress",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-01-12T09:00:00Z",
+      "updatedAt": "2026-06-02T15:21:28.455Z"
+    },
+    {
+      "id": "t4",
+      "projectId": "p1",
+      "title": "Shopping Cart Logic",
+      "description": "Implement cart state management and persistence.",
+      "assignee": "u3",
+      "dueDate": "2026-07-05T00:00:00Z",
+      "priority": "medium",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-01-13T09:00:00Z",
+      "updatedAt": "2026-03-10T09:00:00Z"
+    },
+    {
+      "id": "t5",
+      "projectId": "p2",
+      "title": "User Research & Wireframes",
+      "description": "Conduct user interviews and create wireframes for new flows.",
+      "assignee": "u3",
+      "dueDate": "2026-05-15T00:00:00Z",
+      "priority": "high",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-02-01T09:00:00Z",
+      "updatedAt": "2026-05-15T09:00:00Z"
+    },
+    {
+      "id": "t6",
+      "projectId": "p2",
+      "title": "Design System Update",
+      "description": "Update component library with new brand colors and typography.",
+      "assignee": "u3",
+      "dueDate": "2026-06-05T00:00:00Z",
+      "priority": "medium",
+      "status": "in_progress",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-02-10T09:00:00Z",
+      "updatedAt": "2026-02-10T09:00:00Z"
+    },
+    {
+      "id": "t7",
+      "projectId": "p2",
+      "title": "Onboarding Flow Redesign",
+      "description": "Redesign the onboarding experience to reduce drop-off rate.",
+      "assignee": "u2",
+      "dueDate": "2026-06-12T00:00:00Z",
+      "priority": "low",
+      "status": "todo",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-02-15T09:00:00Z",
+      "updatedAt": "2026-02-15T09:00:00Z"
+    },
+    {
+      "id": "t8",
+      "projectId": "p3",
+      "title": "User Management Module",
+      "description": "Admin panel for managing user roles and permissions.",
+      "assignee": "u4",
+      "dueDate": "2026-04-10T00:00:00Z",
+      "priority": "high",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u1",
+      "createdAt": "2026-01-15T09:00:00Z",
+      "updatedAt": "2026-04-08T09:00:00Z"
+    },
+    {
+      "id": "t9",
+      "projectId": "p3",
+      "title": "Reports & Analytics",
+      "description": "Build reporting dashboard with charts and export functionality.",
+      "assignee": "u1",
+      "dueDate": "2026-04-20T00:00:00Z",
+      "priority": "medium",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u1",
+      "createdAt": "2026-01-20T09:00:00Z",
+      "updatedAt": "2026-04-18T09:00:00Z"
+    },
+    {
+      "id": "t10",
+      "projectId": "p4",
+      "title": "Shipping API Integration",
+      "description": "Integrate with FedEx and UPS APIs for shipping rate calculation.",
+      "assignee": "u4",
+      "dueDate": "2026-07-15T00:00:00Z",
+      "priority": "high",
+      "status": "in_progress",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-03-01T09:00:00Z",
+      "updatedAt": "2026-06-02T15:13:26.019Z"
+    },
+    {
+      "id": "t11",
+      "projectId": "p1",
+      "title": "User Authentication",
+      "description": "Implement JWT-based authentication with refresh tokens.",
+      "assignee": "u4",
+      "dueDate": "2026-05-30T00:00:00Z",
+      "priority": "high",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u1",
+      "createdAt": "2026-01-14T09:00:00Z",
+      "updatedAt": "2026-05-28T09:00:00Z"
+    },
+    {
+      "id": "t12",
+      "projectId": "p2",
+      "title": "Performance Optimization",
+      "description": "Optimize app startup time and reduce bundle size.",
+      "assignee": "u3",
+      "dueDate": "2026-06-08T00:00:00Z",
+      "priority": "low",
+      "status": "completed",
+      "comments": [],
+      "attachments": [],
+      "createdBy": "u2",
+      "createdAt": "2026-03-01T09:00:00Z",
+      "updatedAt": "2026-06-02T15:52:55.330Z"
+    }
+  ],
+  "activityLog": [
+    {
+      "id": "igvn6kygmpwtsmz8",
+      "type": "member_added",
+      "message": "Admin Alex Carter created new team member \"Dave Miller\" (team_member)",
+      "userId": "u1",
+      "createdAt": "2026-06-02T16:02:11.156Z"
+    },
+    {
+      "id": "87xt17vzmpwts8o1",
+      "type": "member_added",
+      "message": "Admin Alex Carter created new team member \"Abdullah\" (project_manager)",
+      "userId": "u1",
+      "createdAt": "2026-06-02T16:01:52.609Z"
+    },
+    {
+      "id": "hw1dnjcjmpwthke1",
+      "type": "project_created",
+      "message": "Project \"hgfjy\" was created",
+      "userId": "u2",
+      "projectId": "8uo74n7kmpwthke1",
+      "createdAt": "2026-06-02T15:53:34.585Z"
+    },
+    {
+      "id": "gy53yjshmpwtgq3m",
+      "type": "task_completed",
+      "message": "Task \"Performance Optimization\" marked as Completed",
+      "userId": "u3",
+      "projectId": "p2",
+      "taskId": "t12",
+      "createdAt": "2026-06-02T15:52:55.330Z"
+    },
+    {
+      "id": "tsn9on23mpwscd5w",
+      "type": "task_completed",
+      "message": "Task \"Setup API Architecture\" marked as Completed",
+      "userId": "u1",
+      "projectId": "p1",
+      "taskId": "t1",
+      "createdAt": "2026-06-02T15:21:32.324Z"
+    },
+    {
+      "id": "u4h4wrydmpwsca6f",
+      "type": "task_status_changed",
+      "message": "Task \"Product Catalog UI\" moved to In Progress",
+      "userId": "u1",
+      "projectId": "p1",
+      "taskId": "t3",
+      "createdAt": "2026-06-02T15:21:28.455Z"
+    },
+    {
+      "id": "tanevh8smpwsc8ha",
+      "type": "task_status_changed",
+      "message": "Task \"Payment Gateway Integration\" moved to In Progress",
+      "userId": "u1",
+      "projectId": "p1",
+      "taskId": "t2",
+      "createdAt": "2026-06-02T15:21:26.254Z"
+    },
+    {
+      "id": "izjfnsgompws9pzl",
+      "type": "project_created",
+      "message": "Project \"Ecommerce Project\" was created",
+      "userId": "u2",
+      "projectId": "3ej016ifmpws9pzl",
+      "createdAt": "2026-06-02T15:19:28.977Z"
+    },
+    {
+      "id": "p95jvxg4mpws1xxf",
+      "type": "task_status_changed",
+      "message": "Task \"Shipping API Integration\" moved to In Progress",
+      "userId": "u1",
+      "projectId": "p4",
+      "taskId": "t10",
+      "createdAt": "2026-06-02T15:13:26.019Z"
+    },
+    {
+      "id": "a1",
+      "type": "project_created",
+      "message": "Project \"E-Commerce Platform\" was created",
+      "userId": "u1",
+      "projectId": "p1",
+      "createdAt": "2026-01-10T08:00:00Z"
+    },
+    {
+      "id": "a2",
+      "type": "task_assigned",
+      "message": "Task \"Setup API Architecture\" assigned to Sam Rivera",
+      "userId": "u1",
+      "projectId": "p1",
+      "taskId": "t1",
+      "createdAt": "2026-01-10T09:00:00Z"
+    },
+    {
+      "id": "a3",
+      "type": "task_completed",
+      "message": "Task \"Shopping Cart Logic\" marked as Completed",
+      "userId": "u3",
+      "projectId": "p1",
+      "taskId": "t4",
+      "createdAt": "2026-03-10T09:00:00Z"
+    },
+    {
+      "id": "a4",
+      "type": "member_added",
+      "message": "Morgan Patel added to project \"E-Commerce Platform\"",
+      "userId": "u1",
+      "projectId": "p1",
+      "createdAt": "2026-01-10T10:00:00Z"
+    },
+    {
+      "id": "a5",
+      "type": "project_completed",
+      "message": "Project \"Admin Dashboard\" marked as Completed",
+      "userId": "u1",
+      "projectId": "p3",
+      "createdAt": "2026-04-28T08:00:00Z"
+    },
+    {
+      "id": "a6",
+      "type": "task_created",
+      "message": "Task \"Payment Gateway Integration\" created in E-Commerce Platform",
+      "userId": "u1",
+      "projectId": "p1",
+      "taskId": "t2",
+      "createdAt": "2026-01-11T09:00:00Z"
+    },
+    {
+      "id": "a7",
+      "type": "task_completed",
+      "message": "Task \"User Research & Wireframes\" marked as Completed",
+      "userId": "u3",
+      "projectId": "p2",
+      "taskId": "t5",
+      "createdAt": "2026-05-15T09:00:00Z"
+    },
+    {
+      "id": "a8",
+      "type": "task_status_changed",
+      "message": "Task \"Setup API Architecture\" moved to In Progress",
+      "userId": "u3",
+      "projectId": "p1",
+      "taskId": "t1",
+      "createdAt": "2026-01-15T10:00:00Z"
+    }
+  ]
+}
