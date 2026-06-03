@@ -98,7 +98,7 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
   const kpis = data?.kpis;
 
   return (
-    <div className="space-y-6 max-w-7xl">
+    <div className="space-y-6 w-full">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>

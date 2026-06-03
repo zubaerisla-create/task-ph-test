@@ -72,7 +72,7 @@ export default function TasksClient({ session }: { session: SessionUser }) {
   const totalPages = Math.ceil(tasks.length / PAGE_SIZE);
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>All Tasks</h1>

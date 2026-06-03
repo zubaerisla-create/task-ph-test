@@ -219,14 +219,14 @@
       "title": "Design System Update",
       "description": "Update component library with new brand colors and typography.",
       "assignee": "u3",
-      "dueDate": "2026-06-05T00:00:00Z",
+      "dueDate": "2026-06-05T00:00:00.000Z",
       "priority": "medium",
-      "status": "in_progress",
+      "status": "completed",
       "comments": [],
       "attachments": [],
       "createdBy": "u2",
       "createdAt": "2026-02-10T09:00:00Z",
-      "updatedAt": "2026-02-10T09:00:00Z"
+      "updatedAt": "2026-06-03T08:04:53.788Z"
     },
     {
       "id": "t7",
@@ -237,11 +237,19 @@
       "dueDate": "2026-06-12T00:00:00Z",
       "priority": "low",
       "status": "todo",
-      "comments": [],
+      "comments": [
+        {
+          "id": "abu5ya1mmpxs74l5",
+          "taskId": "t7",
+          "authorId": "u3",
+          "content": "hi",
+          "createdAt": "2026-06-03T08:05:14.105Z"
+        }
+      ],
       "attachments": [],
       "createdBy": "u2",
       "createdAt": "2026-02-15T09:00:00Z",
-      "updatedAt": "2026-02-15T09:00:00Z"
+      "updatedAt": "2026-06-03T08:05:14.105Z"
     },
     {
       "id": "t8",
@@ -320,6 +328,24 @@
     }
   ],
   "activityLog": [
+    {
+      "id": "47e4voz0mpxs74l5",
+      "type": "comment_added",
+      "message": "Sam Rivera commented on task \"Onboarding Flow Redesign\"",
+      "userId": "u3",
+      "projectId": "p2",
+      "taskId": "t7",
+      "createdAt": "2026-06-03T08:05:14.105Z"
+    },
+    {
+      "id": "ti4y3gdxmpxs6owt",
+      "type": "task_completed",
+      "message": "Task \"Design System Update\" marked as Completed",
+      "userId": "u3",
+      "projectId": "p2",
+      "taskId": "t6",
+      "createdAt": "2026-06-03T08:04:53.789Z"
+    },
     {
       "id": "igvn6kygmpwtsmz8",
       "type": "member_added",

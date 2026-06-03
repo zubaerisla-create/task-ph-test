@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   ArrowLeft, Plus, Trash2, Edit, X, Calendar, CheckCircle2,
   Clock, AlertCircle, MessageSquare, ChevronDown, UserPlus,
@@ -218,6 +219,9 @@ export default function ProjectDetailClient({ session, projectId }: { session: S
   const [addingMember, setAddingMember] = useState(false);
   const [memberToAdd, setMemberToAdd] = useState('');
 
+  const searchParams = useSearchParams();
+  const taskIdParam = searchParams?.get('taskId');
+
   const fetchProject = () => {
     fetch(`/api/projects/${projectId}`).then((r) => r.json()).then((d) => { setProject(d.project); setLoading(false); });
   };
@@ -226,6 +230,15 @@ export default function ProjectDetailClient({ session, projectId }: { session: S
     fetchProject();
     fetch('/api/team').then((r) => r.json()).then((d) => setAllUsers(d.users ?? []));
   }, [projectId]);
+
+  useEffect(() => {
+    if (project && taskIdParam && !editTask) {
+      const t = project.tasks.find((task) => task.id === taskIdParam);
+      if (t) {
+        setEditTask(t);
+      }
+    }
+  }, [project, taskIdParam]);
 
   const deleteTask = async (id: string) => {
     if (!confirm('Delete this task?')) return;
@@ -267,7 +280,7 @@ export default function ProjectDetailClient({ session, projectId }: { session: S
   ];
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       {/* Back */}
       <Link href="/projects" className="inline-flex items-center gap-1.5 text-sm" style={{ color: 'var(--text-secondary)' }}>
         <ArrowLeft className="w-4 h-4" /> Back to Projects

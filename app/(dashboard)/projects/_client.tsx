@@ -142,7 +142,7 @@ export default function ProjectsClient({ session }: { session: SessionUser }) {
   const canManage = session.role !== 'team_member';
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

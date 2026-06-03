@@ -47,7 +47,7 @@ export default function ActivityClient({ session }: { session: SessionUser }) {
   }, []);
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="w-full space-y-6">
       <div>
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Activity Log</h1>
         <p style={{ color: 'var(--text-secondary)' }}>Recent system activities and events</p>

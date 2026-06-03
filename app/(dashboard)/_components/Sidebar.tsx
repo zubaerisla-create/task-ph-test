@@ -30,7 +30,9 @@ export default function Sidebar({ user }: { user: SessionUser }) {
           </div>
           <div>
             <span className="text-lg font-bold gradient-text leading-none">CollabFlow</span>
-            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>Project Management</p>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+              {user.role === 'admin' ? 'Admin Panel' : user.role === 'project_manager' ? 'PM Workspace' : 'Team Space'}
+            </p>
           </div>
         </div>
       </div>

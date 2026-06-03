@@ -1,5 +1,6 @@
 'use client';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Sun, Moon, LogOut, Bell } from 'lucide-react';
 import { useTheme } from '@/app/_components/ThemeProvider';
 import type { SessionUser } from '@/app/_lib/types';
@@ -24,15 +25,16 @@ export default function TopBar({ user }: { user: SessionUser }) {
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Notifications bell (decorative) */}
-        <button
+        {/* Notifications bell */}
+        <Link
+          href="/activity"
           id="topbar-notifications"
           className="w-9 h-9 rounded-xl flex items-center justify-center btn-secondary relative"
-          title="Notifications"
+          title="Notifications / Activity"
         >
           <Bell className="w-4 h-4" style={{ color: 'var(--text-secondary)' }} />
           <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-violet-500"></span>
-        </button>
+        </Link>
 
         {/* Theme toggle */}
         <button
@@ -47,9 +49,11 @@ export default function TopBar({ user }: { user: SessionUser }) {
         </button>
 
         {/* Avatar */}
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold ${avatarColor(user.avatar)}`}>
-          {user.avatar}
-        </div>
+        <Link href="/profile" id="topbar-profile" className="cursor-pointer shadow-sm" title="My Profile">
+          <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white text-sm font-bold hover:opacity-90 transition-opacity ${avatarColor(user.avatar)}`}>
+            {user.avatar}
+          </div>
+        </Link>
 
         {/* Logout */}
         <button

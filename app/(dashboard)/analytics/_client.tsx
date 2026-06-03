@@ -36,7 +36,7 @@ export default function AnalyticsClient({ session }: { session: SessionUser }) {
   const completionRate = data?.kpis.totalTasks ? Math.round((data.kpis.completedTasks / data.kpis.totalTasks) * 100) : 0;
 
   return (
-    <div className="max-w-7xl space-y-6">
+    <div className="w-full space-y-6">
       <div>
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>Analytics</h1>
         <p style={{ color: 'var(--text-secondary)' }}>Comprehensive insights into your team&apos;s productivity</p>
