@@ -1,7 +1,7 @@
 import { getSession } from '@/app/_lib/auth';
 import DashboardClient from './_client';
 
-export const metadata = { title: 'Dashboard — CollabFlow' };
+export const metadata = { title: 'Dashboard — Task Track' };
 
 export default async function DashboardPage() {
   const session = await getSession();

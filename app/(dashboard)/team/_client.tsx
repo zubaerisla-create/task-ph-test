@@ -8,15 +8,19 @@ interface TeamMember {
   id: string; name: string; email: string; role: Role; avatar: string;
   taskCount: number; completedTasks: number; inProgressTasks: number;
   todoTasks: number; overdueTasks: number; projectCount: number;
+  profilePicture?: string;
 }
 
 interface CreateModalProps {
   onClose: () => void;
   onSaved: () => void;
+  members: TeamMember[];
 }
 
-function CreateMemberModal({ onClose, onSaved }: CreateModalProps) {
+function CreateMemberModal({ onClose, onSaved, members }: CreateModalProps) {
+  const [mode, setMode] = useState<'create' | 'update_role'>('create');
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'team_member' as Role });
+  const [updateForm, setUpdateForm] = useState({ userId: '', role: 'team_member' as Role });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -25,60 +29,139 @@ function CreateMemberModal({ onClose, onSaved }: CreateModalProps) {
     setLoading(true);
     setError('');
 
-    const res = await fetch('/api/team', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    const data = await res.json();
-    if (res.ok) {
-      onSaved();
-      onClose();
+    if (mode === 'create') {
+      const res = await fetch('/api/team', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onSaved();
+        onClose();
+      } else {
+        setError(data.error ?? 'Failed to create team member');
+        setLoading(false);
+      }
     } else {
-      setError(data.error ?? 'Failed to create team member');
-      setLoading(false);
+      if (!updateForm.userId) {
+        setError('Please select a member');
+        setLoading(false);
+        return;
+      }
+      const res = await fetch(`/api/team/${updateForm.userId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: updateForm.role }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        onSaved();
+        onClose();
+      } else {
+        setError(data.error ?? 'Failed to update user role');
+        setLoading(false);
+      }
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={onClose}>
       <div className="w-full max-w-md glass rounded-2xl p-6 animate-slide-up" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Create Team Member</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>Manage Team Roles</h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg btn-secondary">
             <X className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Mode Tabs */}
+        <div className="flex border-b border-base mb-5">
+          <button
+            type="button"
+            onClick={() => { setMode('create'); setError(''); }}
+            className={`flex-1 pb-3 text-sm font-semibold border-b-2 transition-all ${
+              mode === 'create'
+                ? 'border-violet-500 text-violet-400'
+                : 'border-transparent text-muted hover:text-secondary'
+            }`}
+          >
+            Create New Member
+          </button>
+          <button
+            type="button"
+            onClick={() => { setMode('update_role'); setError(''); }}
+            className={`flex-1 pb-3 text-sm font-semibold border-b-2 transition-all ${
+              mode === 'update_role'
+                ? 'border-violet-500 text-violet-400'
+                : 'border-transparent text-muted hover:text-secondary'
+            }`}
+          >
+            Update Role
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Full Name *</label>
-            <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl input-base text-sm" placeholder="E.g. Jane Doe" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Email *</label>
-            <input required type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl input-base text-sm" placeholder="E.g. jane@company.com" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Password *</label>
-            <input required type="password" minLength={6} value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
-              className="w-full px-4 py-2.5 rounded-xl input-base text-sm" placeholder="Minimum 6 characters" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Role *</label>
-            <select value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as Role }))}
-              className="w-full px-4 py-2.5 rounded-xl input-base text-sm">
-              <option value="team_member">Team Member</option>
-              <option value="project_manager">Project Manager</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
+          {mode === 'create' ? (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Full Name *</label>
+                <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  className="w-full px-4 py-2.5 rounded-xl input-base text-sm" placeholder="E.g. Jane Doe" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Email *</label>
+                <input required type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+                  className="w-full px-4 py-2.5 rounded-xl input-base text-sm" placeholder="E.g. jane@company.com" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Password *</label>
+                <input required type="password" minLength={6} value={form.password} onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+                  className="w-full px-4 py-2.5 rounded-xl input-base text-sm" placeholder="Minimum 6 characters" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Role *</label>
+                <select value={form.role} onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as Role }))}
+                  className="w-full px-4 py-2.5 rounded-xl input-base text-sm">
+                  <option value="team_member">Team Member</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </>
+          ) : (
+            <>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>Select Team Member *</label>
+                <select required value={updateForm.userId} onChange={(e) => {
+                  const uid = e.target.value;
+                  const member = members.find(m => m.id === uid);
+                  setUpdateForm((f) => ({ ...f, userId: uid, role: member ? member.role : 'team_member' }));
+                }}
+                  className="w-full px-4 py-2.5 rounded-xl input-base text-sm">
+                  <option value="">Choose a member...</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.id}>{m.name} ({m.email})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>New Role *</label>
+                <select value={updateForm.role} onChange={(e) => setUpdateForm((f) => ({ ...f, role: e.target.value as Role }))}
+                  className="w-full px-4 py-2.5 rounded-xl input-base text-sm">
+                  <option value="team_member">Team Member</option>
+                  <option value="project_manager">Project Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+            </>
+          )}
+
           {error && <p className="text-sm text-red-400 bg-red-500/10 px-4 py-2.5 rounded-xl border border-red-500/20">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl btn-secondary text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>Cancel</button>
             <button type="submit" disabled={loading} className="flex-1 py-2.5 rounded-xl btn-primary text-sm font-medium flex items-center justify-center gap-2">
-              {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spinner" /> : 'Create Member'}
+              {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full spinner" /> : mode === 'create' ? 'Create Member' : 'Update Role'}
             </button>
           </div>
         </form>
@@ -171,7 +254,11 @@ export default function TeamClient({ session }: { session: SessionUser }) {
             return (
               <div key={m.id} className={`surface rounded-2xl p-6 card-hover ${isMe ? 'border-violet-500/30' : ''}`}>
                 <div className="flex items-start gap-4">
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 ${avatarColor(m.avatar)}`}>{m.avatar}</div>
+                  {m.profilePicture ? (
+                    <img src={m.profilePicture} alt={m.name} className="w-14 h-14 rounded-2xl object-cover flex-shrink-0" />
+                  ) : (
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold flex-shrink-0 ${avatarColor(m.avatar)}`}>{m.avatar}</div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>{m.name}</h3>
@@ -222,6 +309,7 @@ export default function TeamClient({ session }: { session: SessionUser }) {
         <CreateMemberModal
           onClose={() => setShowCreateModal(false)}
           onSaved={fetchMembers}
+          members={members}
         />
       )}
     </div>

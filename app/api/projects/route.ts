@@ -1,47 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDB, writeDB, generateId, invalidateCache } from '../../_lib/db';
 import { getSession } from '../../_lib/auth';
-import type { Project, ActivityLog } from '../../_lib/types';
+import { proxyRequest, normalizeRole, normalizeStatus, normalizePriority, makeAvatar } from '../../_lib/api';
+
+function normalizeProject(p: any) {
+  const members = (p.members ?? []).map((m: any) => ({
+    id: m.id,
+    name: m.name,
+    email: m.email,
+    role: normalizeRole(m.role),
+    avatar: makeAvatar(m.name ?? ''),
+    profilePicture: m.profilePicture ?? '',
+  }));
+
+  const taskCount = p.taskCount ?? p._count?.tasks ?? 0;
+  const completedTasks = p.completedTasks ?? 0;
+
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description ?? '',
+    deadline: p.deadline,
+    status: normalizeStatus(p.status) as any,
+    members,
+    taskCount,
+    completedTasks,
+    createdAt: p.createdAt,
+    updatedAt: p.updatedAt,
+  };
+}
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    invalidateCache();
-    const db = await readDB();
     const { searchParams } = new URL(req.url);
-    const search = searchParams.get('search')?.toLowerCase() ?? '';
+    const search = searchParams.get('search') ?? '';
     const status = searchParams.get('status') ?? '';
 
-    let projects = db.projects;
-
-    // Non-admins only see projects they are members of
-    if (session.role === 'team_member') {
-      projects = projects.filter((p) => p.members.includes(session.id));
-    }
-    if (search) {
-      projects = projects.filter(
-        (p) => p.name.toLowerCase().includes(search) || p.description.toLowerCase().includes(search)
-      );
-    }
-    if (status) {
-      projects = projects.filter((p) => p.status === status);
-    }
-
-    // Enrich with task stats
-    const enriched = projects.map((p) => {
-      const tasks = db.tasks.filter((t) => t.projectId === p.id);
-      const completed = tasks.filter((t) => t.status === 'completed').length;
-      const members = db.users.filter((u) => p.members.includes(u.id)).map((u) => ({
-        id: u.id, name: u.name, avatar: u.avatar, role: u.role,
-      }));
-      return { ...p, taskCount: tasks.length, completedTasks: completed, members };
+    const result = await proxyRequest('/projects', {
+      searchParams: {
+        ...(search ? { searchTerm: search } : {}),
+        ...(status ? { status: status.toUpperCase() } : {}),
+      },
     });
 
-    return NextResponse.json({ projects: enriched });
+    if (!result.ok) {
+      return NextResponse.json({ error: 'Failed to fetch projects' }, { status: result.status });
+    }
+
+    const raw = result.data as any;
+    const backendProjects: any[] = raw?.data?.data ?? raw?.data ?? [];
+
+    // Enrich with task stats from dashboard
+    const dashResult = await proxyRequest('/dashboard/insights');
+    const dashData = dashResult.ok ? (dashResult.data as any)?.data ?? dashResult.data : null;
+    const projectSummary: any[] = dashData?.projectSummary ?? [];
+
+    const projects = backendProjects.map((p: any) => {
+      const summary = projectSummary.find((s: any) => s.id === p.id);
+      return normalizeProject({
+        ...p,
+        taskCount: summary?.totalTasks ?? 0,
+        completedTasks: summary?.completedTasks ?? 0,
+      });
+    });
+
+    return NextResponse.json({ projects });
   } catch (err) {
-    console.error(err);
+    console.error('[GET /api/projects]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -58,46 +85,32 @@ export async function POST(req: NextRequest) {
     if (!name || !deadline) {
       return NextResponse.json({ error: 'Name and deadline are required' }, { status: 400 });
     }
-    if (new Date(deadline) < new Date()) {
-      return NextResponse.json({ error: 'Please select a valid deadline (future date)' }, { status: 400 });
+
+    const memberIds = members ?? [];
+    if (session.id && !memberIds.includes(session.id)) {
+      memberIds.push(session.id);
     }
 
-    invalidateCache();
-    const db = await readDB();
+    const result = await proxyRequest('/projects', {
+      method: 'POST',
+      body: {
+        name,
+        description: description ?? '',
+        deadline: new Date(deadline).toISOString(),
+        memberIds,
+      },
+    });
 
-    const existing = db.projects.find((p) => p.name.toLowerCase() === name.toLowerCase());
-    if (existing) {
-      return NextResponse.json({ error: 'A project with this name already exists' }, { status: 409 });
+    const data = result.data as any;
+    if (!result.ok) {
+      const msg = data?.message ?? data?.error ?? 'Failed to create project';
+      return NextResponse.json({ error: msg }, { status: result.status });
     }
 
-    const project: Project = {
-      id: generateId(),
-      name,
-      description: description ?? '',
-      deadline,
-      status: status ?? 'active',
-      createdBy: session.id,
-      members: members ?? [session.id],
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    const log: ActivityLog = {
-      id: generateId(),
-      type: 'project_created',
-      message: `Project "${name}" was created`,
-      userId: session.id,
-      projectId: project.id,
-      createdAt: new Date().toISOString(),
-    };
-
-    db.projects.push(project);
-    db.activityLog.unshift(log);
-    await writeDB(db);
-
-    return NextResponse.json({ project }, { status: 201 });
+    const project = data?.data ?? data;
+    return NextResponse.json({ project: normalizeProject(project) }, { status: 201 });
   } catch (err) {
-    console.error(err);
+    console.error('[POST /api/projects]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

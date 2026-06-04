@@ -8,7 +8,7 @@ import { formatDate, isOverdue, taskStatusLabel, daysUntil, avatarColor } from '
 interface Task {
   id: string; projectId: string; title: string; description: string;
   assignee: string; dueDate: string; priority: TaskPriority; status: TaskStatus;
-  projectName: string; assigneeUser: { id: string; name: string; avatar: string } | null;
+  projectName: string; assigneeUser: { id: string; name: string; avatar: string; profilePicture?: string } | null;
   createdAt: string;
 }
 interface Member { id: string; name: string; }
@@ -136,7 +136,8 @@ export default function TasksClient({ session }: { session: SessionUser }) {
         </div>
       ) : (
         <div className="surface rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
@@ -162,7 +163,11 @@ export default function TasksClient({ session }: { session: SessionUser }) {
                       <td className="px-5 py-4">
                         {task.assigneeUser && (
                           <div className="flex items-center gap-2">
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(task.assigneeUser.avatar)}`}>{task.assigneeUser.avatar}</div>
+                            {task.assigneeUser.profilePicture ? (
+                              <img src={task.assigneeUser.profilePicture} alt={task.assigneeUser.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                            ) : (
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(task.assigneeUser.avatar)}`}>{task.assigneeUser.avatar}</div>
+                            )}
                             <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{task.assigneeUser.name.split(' ')[0]}</span>
                           </div>
                         )}
@@ -195,6 +200,76 @@ export default function TasksClient({ session }: { session: SessionUser }) {
             </table>
           </div>
 
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-base">
+            {paginated.map((task) => {
+              const overdue = isOverdue(task.dueDate) && task.status !== 'completed';
+              return (
+                <div key={task.id} className="p-4 space-y-3">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0">
+                      <p className={`font-semibold text-sm ${task.status === 'completed' ? 'line-through opacity-60' : ''}`} style={{ color: 'var(--text-primary)' }}>
+                        {task.title}
+                      </p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                        Project: <Link href={`/projects/${task.projectId}`} className="hover:underline text-violet-400 font-medium">{task.projectName}</Link>
+                      </p>
+                    </div>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium flex-shrink-0 badge-${task.priority}`}>
+                      {task.priority}
+                    </span>
+                  </div>
+                  
+                  {task.description && (
+                    <p className="text-xs line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
+                      {task.description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center justify-between pt-1">
+                    {task.assigneeUser ? (
+                      <div className="flex items-center gap-1.5">
+                        {task.assigneeUser.profilePicture ? (
+                          <img src={task.assigneeUser.profilePicture} alt={task.assigneeUser.name} className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                        ) : (
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold ${avatarColor(task.assigneeUser.avatar)}`}>
+                            {task.assigneeUser.avatar}
+                          </div>
+                        )}
+                        <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{task.assigneeUser.name.split(' ')[0]}</span>
+                      </div>
+                    ) : (
+                      <span className="text-xs" style={{ color: 'var(--text-muted)' }}>Unassigned</span>
+                    )}
+
+                    <div className="flex items-center gap-1.5">
+                      <Calendar className="w-3 h-3 text-slate-400" />
+                      <span className={`text-xs ${overdue ? 'text-red-400 font-medium' : ''}`} style={overdue ? {} : { color: 'var(--text-secondary)' }}>
+                        {formatDate(task.dueDate)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center pt-2 border-t border-base border-dashed">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium badge-${task.status}`}>
+                      {taskStatusLabel(task.status)}
+                    </span>
+                    <div className="flex gap-2">
+                      <button onClick={() => openEdit(task)} className="px-3 py-1.5 rounded-lg btn-secondary text-xs flex items-center gap-1 font-medium" style={{ color: 'var(--text-secondary)' }}>
+                        <Edit className="w-3.5 h-3.5" /> Edit
+                      </button>
+                      {canDelete && (
+                        <button onClick={() => deleteTask(task.id)} className="px-3 py-1.5 rounded-lg btn-secondary text-xs flex items-center gap-1 font-medium text-red-400">
+                          <Trash2 className="w-3.5 h-3.5" /> Delete
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-4 border-t border-base">
@@ -216,7 +291,7 @@ export default function TasksClient({ session }: { session: SessionUser }) {
       {/* Quick edit modal */}
       {editTask && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={() => setEditTask(null)}>
-          <div className="w-full max-w-sm glass rounded-2xl p-6 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm glass rounded-2xl p-6 animate-slide-up max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold" style={{ color: 'var(--text-primary)' }}>Quick Update</h3>
               <button onClick={() => setEditTask(null)} className="w-8 h-8 flex items-center justify-center rounded-lg btn-secondary"><X className="w-4 h-4" /></button>

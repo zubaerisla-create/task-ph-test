@@ -1,7 +1,7 @@
 import { getSession } from '@/app/_lib/auth';
 import ProjectDetailClient from './_client';
 
-export const metadata = { title: 'Project Detail — CollabFlow' };
+export const metadata = { title: 'Project Detail — Task Track' };
 
 export default async function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();

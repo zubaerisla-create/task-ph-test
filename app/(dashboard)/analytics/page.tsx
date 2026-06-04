@@ -1,7 +1,7 @@
 import { getSession } from '@/app/_lib/auth';
 import AnalyticsClient from './_client';
 
-export const metadata = { title: 'Analytics — CollabFlow' };
+export const metadata = { title: 'Analytics — Task Track' };
 
 export default async function AnalyticsPage() {
   const session = await getSession();

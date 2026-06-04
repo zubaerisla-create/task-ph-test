@@ -3,7 +3,7 @@ import './globals.css';
 import { ThemeProvider } from './_components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'CollabFlow — Smart Project & Task Management',
+  title: 'Task Track — Smart Project & Task Management',
   description:
     'A premium team collaboration platform for managing projects, tasks, and team productivity with real-time insights.',
 };

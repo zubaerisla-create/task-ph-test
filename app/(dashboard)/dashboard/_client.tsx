@@ -30,7 +30,7 @@ interface AnalyticsData {
   upcomingDeadlines: Array<{
     id: string; title: string; dueDate: string; priority: string;
     projectName: string;
-    assigneeUser: { name: string; avatar: string } | null;
+    assigneeUser: { name: string; avatar: string; profilePicture?: string } | null;
   }>;
 }
 
@@ -39,14 +39,14 @@ interface ActivityLog {
   message: string;
   createdAt: string;
   type: string;
-  user: { name: string; avatar: string } | null;
+  user: { name: string; avatar: string; profilePicture?: string } | null;
 }
 
 function KpiCard({ label, value, icon: Icon, color, sub }: {
   label: string; value: number; icon: React.ElementType; color: string; sub?: string;
 }) {
   return (
-    <div className="surface rounded-2xl p-6 card-hover">
+    <div className="surface rounded-2xl p-4 sm:p-6 card-hover">
       <div className="flex items-start justify-between mb-4">
         <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
           <Icon className="w-6 h-6 text-white" />
@@ -103,7 +103,7 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
       <div>
         <h1 className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
           Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},{' '}
-          <span className="gradient-text">{session.name.split(' ')[0]}</span> 👋
+          <span className="gradient-text">{session.name.split(' ')[0]}</span> 
         </h1>
         <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>
           Here&apos;s what&apos;s happening across your projects today.
@@ -111,7 +111,7 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         <KpiCard label="Total Projects" value={kpis?.totalProjects ?? 0} icon={FolderKanban} color="bg-violet-500" sub={`${kpis?.activeProjects ?? 0} active`} />
         <KpiCard label="Total Tasks" value={kpis?.totalTasks ?? 0} icon={CheckSquare} color="bg-blue-500" />
         <KpiCard label="Completed" value={kpis?.completedTasks ?? 0} icon={CheckCircle2} color="bg-emerald-500" />
@@ -203,9 +203,13 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
           <div className="space-y-3">
             {activity.map((log) => (
               <div key={log.id} className="flex items-start gap-3">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarColor(log.user?.avatar ?? 'A')}`}>
-                  {log.user?.avatar ?? '?'}
-                </div>
+                {log.user?.profilePicture ? (
+                  <img src={log.user.profilePicture} alt={log.user.name} className="w-7 h-7 rounded-lg object-cover flex-shrink-0" />
+                ) : (
+                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarColor(log.user?.avatar ?? 'A')}`}>
+                    {log.user?.avatar ?? '?'}
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{log.message}</p>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>

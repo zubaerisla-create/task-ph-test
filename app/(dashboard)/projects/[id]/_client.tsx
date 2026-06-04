@@ -9,14 +9,14 @@ import {
 import type { SessionUser, TaskStatus, TaskPriority } from '@/app/_lib/types';
 import { formatDate, daysUntil, isOverdue, taskStatusLabel, avatarColor, projectStatusLabel } from '@/app/_lib/utils';
 
-interface Comment { id: string; content: string; createdAt: string; author: { name: string; avatar: string } | null; }
-interface TaskMember { id: string; name: string; avatar: string; }
+interface Comment { id: string; content: string; createdAt: string; author: { name: string; avatar: string; profilePicture?: string } | null; }
+interface TaskMember { id: string; name: string; avatar: string; profilePicture?: string; }
 interface Task {
   id: string; projectId: string; title: string; description: string; assignee: string;
   dueDate: string; priority: TaskPriority; status: TaskStatus; comments: Comment[];
   assigneeUser: TaskMember | null; createdAt: string;
 }
-interface Member { id: string; name: string; avatar: string; role: string; email: string; }
+interface Member { id: string; name: string; avatar: string; role: string; email: string; profilePicture?: string; }
 interface Project {
   id: string; name: string; description: string; deadline: string; status: string;
   members: Member[]; tasks: Task[]; taskCount: number; completedTasks: number;
@@ -58,7 +58,7 @@ function TaskForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={onClose}>
-      <div className="w-full max-w-lg glass rounded-2xl p-6 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg glass rounded-2xl p-6 animate-slide-up max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>{isEdit ? 'Edit Task' : 'Create Task'}</h2>
           <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg btn-secondary"><X className="w-4 h-4" /></button>
@@ -166,7 +166,11 @@ function TaskCard({ task, session, onEdit, onDelete, onStatusChange }: {
           <div className="flex items-center gap-3 mt-2 flex-wrap">
             {task.assigneeUser && (
               <div className="flex items-center gap-1.5">
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(task.assigneeUser.avatar)}`}>{task.assigneeUser.avatar}</div>
+                {task.assigneeUser.profilePicture ? (
+                  <img src={task.assigneeUser.profilePicture} alt={task.assigneeUser.name} className="w-5 h-5 rounded-full object-cover flex-shrink-0" />
+                ) : (
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center text-white text-xs font-bold ${avatarColor(task.assigneeUser.avatar)}`}>{task.assigneeUser.avatar}</div>
+                )}
                 <span className="text-xs" style={{ color: 'var(--text-muted)' }}>{task.assigneeUser.name.split(' ')[0]}</span>
               </div>
             )}
@@ -188,7 +192,11 @@ function TaskCard({ task, session, onEdit, onDelete, onStatusChange }: {
         <div className="mt-3 pt-3 border-t border-base space-y-3">
           {comments.map((c) => (
             <div key={c.id} className="flex items-start gap-2">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarColor(c.author?.avatar ?? 'U')}`}>{c.author?.avatar ?? '?'}</div>
+              {c.author?.profilePicture ? (
+                <img src={c.author.profilePicture} alt={c.author.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+              ) : (
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarColor(c.author?.avatar ?? 'U')}`}>{c.author?.avatar ?? '?'}</div>
+              )}
               <div>
                 <span className="text-xs font-medium" style={{ color: 'var(--text-secondary)' }}>{c.author?.name}</span>
                 <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>{c.content}</p>
@@ -298,15 +306,25 @@ export default function ProjectDetailClient({ session, projectId }: { session: S
             <p className="mt-1" style={{ color: 'var(--text-secondary)' }}>{project.description}</p>
           </div>
           <div className="flex items-center gap-3">
-            {/* Members */}
             <div className="flex -space-x-2">
               {project.members.slice(0, 5).map((m) => (
-                <div key={m.id} title={m.name} className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold ${avatarColor(m.avatar)}`} style={{ borderColor: 'var(--bg-surface)' }}>{m.avatar}</div>
+                <div key={m.id} title={m.name} className="relative w-8 h-8">
+                  {m.profilePicture ? (
+                    <img src={m.profilePicture} alt={m.name} className="w-8 h-8 rounded-full object-cover border-2" style={{ borderColor: 'var(--bg-surface)' }} />
+                  ) : (
+                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold ${avatarColor(m.avatar)}`} style={{ borderColor: 'var(--bg-surface)' }}>{m.avatar}</div>
+                  )}
+                </div>
               ))}
             </div>
             {canManage && (
-              <button onClick={() => setAddingMember(true)} className="w-8 h-8 rounded-full border-2 border-dashed flex items-center justify-center btn-secondary" style={{ borderColor: 'var(--border-color)' }}>
-                <UserPlus className="w-3.5 h-3.5" style={{ color: 'var(--text-muted)' }} />
+              <button
+                onClick={() => setAddingMember(true)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold btn-secondary transition-all border border-dashed hover:border-violet-500/50 hover:bg-violet-500/10 text-violet-400"
+                style={{ borderColor: 'rgba(167, 139, 250, 0.3)' }}
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Add Team Member</span>
               </button>
             )}
           </div>
@@ -327,7 +345,7 @@ export default function ProjectDetailClient({ session, projectId }: { session: S
       {/* Add member modal */}
       {addingMember && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={() => setAddingMember(false)}>
-          <div className="w-full max-w-sm glass rounded-2xl p-6 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm glass rounded-2xl p-6 animate-slide-up max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-bold mb-4" style={{ color: 'var(--text-primary)' }}>Add Team Member</h3>
             <select value={memberToAdd} onChange={(e) => setMemberToAdd(e.target.value)} className="w-full px-4 py-2.5 rounded-xl input-base text-sm mb-4">
               <option value="">Select member...</option>
@@ -345,7 +363,7 @@ export default function ProjectDetailClient({ session, projectId }: { session: S
       <div>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
           <h2 className="font-bold text-lg" style={{ color: 'var(--text-primary)' }}>Tasks</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="px-3 py-2 rounded-xl input-base text-xs">
               <option value="">All Status</option>
               <option value="todo">To Do</option>

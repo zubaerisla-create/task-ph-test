@@ -84,4 +84,5 @@ export interface SessionUser {
   email: string;
   role: Role;
   avatar: string;
+  profilePicture?: string;
 }

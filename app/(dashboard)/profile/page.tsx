@@ -1,7 +1,7 @@
 import { getSession } from '@/app/_lib/auth';
 import ProfileClient from './_client';
 
-export const metadata = { title: 'My Profile — CollabFlow' };
+export const metadata = { title: 'My Profile — Task Track' };
 
 export default async function ProfilePage() {
   const session = await getSession();

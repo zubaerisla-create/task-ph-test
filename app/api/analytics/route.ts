@@ -1,93 +1,67 @@
 import { NextResponse } from 'next/server';
-import { readDB, invalidateCache } from '../../_lib/db';
 import { getSession } from '../../_lib/auth';
+import { proxyRequest } from '../../_lib/api';
 
 export async function GET() {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    invalidateCache();
-    const db = await readDB();
-    const now = new Date();
+    const result = await proxyRequest('/dashboard/insights');
+    if (!result.ok) {
+      return NextResponse.json({ error: 'Failed to fetch dashboard data' }, { status: result.status });
+    }
 
-    const allTasks = db.tasks;
-    const userTasks = session.role === 'team_member'
-      ? allTasks.filter((t) => t.assignee === session.id)
-      : allTasks;
+    const raw = (result.data as any)?.data ?? result.data;
 
-    const totalProjects = session.role === 'team_member'
-      ? db.projects.filter((p) => p.members.includes(session.id)).length
-      : db.projects.length;
-    const activeProjects = session.role === 'team_member'
-      ? db.projects.filter((p) => p.members.includes(session.id) && p.status === 'active').length
-      : db.projects.filter((p) => p.status === 'active').length;
-    const totalTasks = userTasks.length;
-    const completedTasks = userTasks.filter((t) => t.status === 'completed').length;
-    const pendingTasks = userTasks.filter((t) => t.status !== 'completed').length;
-    const overdueTasks = userTasks.filter(
-      (t) => t.status !== 'completed' && new Date(t.dueDate) < now
-    ).length;
-
-    // Tasks by priority
-    const tasksByPriority = [
-      { name: 'High', value: userTasks.filter((t) => t.priority === 'high').length, fill: '#ef4444' },
-      { name: 'Medium', value: userTasks.filter((t) => t.priority === 'medium').length, fill: '#f59e0b' },
-      { name: 'Low', value: userTasks.filter((t) => t.priority === 'low').length, fill: '#10b981' },
-    ];
-
-    // Task status distribution
-    const tasksByStatus = [
-      { name: 'To Do', value: userTasks.filter((t) => t.status === 'todo').length, fill: '#64748b' },
-      { name: 'In Progress', value: userTasks.filter((t) => t.status === 'in_progress').length, fill: '#3b82f6' },
-      { name: 'Completed', value: userTasks.filter((t) => t.status === 'completed').length, fill: '#10b981' },
-    ];
-
-    // Project progress
-    const projectProgress = db.projects
-      .filter((p) => session.role === 'team_member' ? p.members.includes(session.id) : true)
-      .map((p) => {
-        const ptasks = db.tasks.filter((t) => t.projectId === p.id);
-        const done = ptasks.filter((t) => t.status === 'completed').length;
-        return {
-          name: p.name.length > 20 ? p.name.slice(0, 20) + '...' : p.name,
-          progress: ptasks.length ? Math.round((done / ptasks.length) * 100) : 0,
-          total: ptasks.length,
-          completed: done,
-        };
-      });
-
-    // Team productivity
-    const teamProductivity = db.users.map((u) => {
-      const tasks = db.tasks.filter((t) => t.assignee === u.id);
-      return {
-        name: u.name.split(' ')[0],
-        completed: tasks.filter((t) => t.status === 'completed').length,
-        pending: tasks.filter((t) => t.status !== 'completed').length,
-      };
-    });
-
-    // Upcoming deadlines
-    const upcomingDeadlines = db.tasks
-      .filter((t) => t.status !== 'completed' && new Date(t.dueDate) >= now)
-      .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
-      .slice(0, 5)
-      .map((t) => {
-        const assigneeUser = db.users.find((u) => u.id === t.assignee);
-        const project = db.projects.find((p) => p.id === t.projectId);
-        return { ...t, assigneeUser: assigneeUser ? { name: assigneeUser.name, avatar: assigneeUser.avatar } : null, projectName: project?.name ?? '' };
-      });
+    const kpi = raw?.kpi ?? {};
+    const projectSummary: any[] = raw?.projectSummary ?? [];
+    const tasksByPriority = raw?.tasksByPriority ?? { HIGH: 0, MEDIUM: 0, LOW: 0 };
+    const taskStatusDistribution = raw?.taskStatusDistribution ?? { TODO: 0, IN_PROGRESS: 0, COMPLETED: 0 };
+    const memberWorkload: any[] = raw?.memberWorkloadSummary ?? [];
+    const upcomingDeadlines: any[] = raw?.upcomingDeadlines ?? [];
 
     return NextResponse.json({
-      kpis: { totalProjects, activeProjects, totalTasks, completedTasks, pendingTasks, overdueTasks },
-      tasksByPriority,
-      tasksByStatus,
-      projectProgress,
-      teamProductivity,
-      upcomingDeadlines,
+      kpis: {
+        totalProjects: kpi.totalProjects ?? 0,
+        activeProjects: projectSummary.filter((p: any) => p.status === 'ACTIVE').length,
+        totalTasks: kpi.totalTasks ?? 0,
+        completedTasks: kpi.completedTasks ?? 0,
+        pendingTasks: kpi.pendingTasks ?? 0,
+        overdueTasks: kpi.overdueTasks ?? 0,
+      },
+      tasksByPriority: [
+        { name: 'High', value: tasksByPriority.HIGH ?? 0, fill: '#ef4444' },
+        { name: 'Medium', value: tasksByPriority.MEDIUM ?? 0, fill: '#f59e0b' },
+        { name: 'Low', value: tasksByPriority.LOW ?? 0, fill: '#10b981' },
+      ],
+      tasksByStatus: [
+        { name: 'To Do', value: taskStatusDistribution.TODO ?? 0, fill: '#64748b' },
+        { name: 'In Progress', value: taskStatusDistribution.IN_PROGRESS ?? 0, fill: '#3b82f6' },
+        { name: 'Completed', value: taskStatusDistribution.COMPLETED ?? 0, fill: '#10b981' },
+      ],
+      projectProgress: projectSummary.map((p: any) => ({
+        name: p.name.length > 20 ? p.name.slice(0, 20) + '...' : p.name,
+        progress: p.progressPercentage ?? 0,
+        total: p.totalTasks ?? 0,
+        completed: p.completedTasks ?? 0,
+      })),
+      teamProductivity: memberWorkload.map((m: any) => ({
+        name: (m.name ?? '').split(' ')[0],
+        completed: m.completedTasks ?? 0,
+        pending: m.pendingTasks ?? 0,
+      })),
+      upcomingDeadlines: upcomingDeadlines.map((t: any) => ({
+        id: t.id,
+        title: t.title,
+        dueDate: t.dueDate,
+        priority: (t.priority ?? 'MEDIUM').toLowerCase(),
+        projectName: t.project?.name ?? '',
+        assigneeUser: null,
+      })),
     });
   } catch (err) {
-    console.error(err);
+    console.error('[GET /api/analytics]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

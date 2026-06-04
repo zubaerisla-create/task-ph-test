@@ -1,44 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readDB, writeDB, generateId, invalidateCache } from '../../_lib/db';
 import { getSession } from '../../_lib/auth';
-import type { User, ActivityLog } from '../../_lib/types';
+import { proxyRequest, normalizeRole, makeAvatar } from '../../_lib/api';
+
+// Normalize backend user to frontend shape
+function normalizeUser(u: any) {
+  const avatar = makeAvatar(u.name ?? '');
+  return {
+    id: u.id,
+    name: u.name,
+    email: u.email,
+    role: normalizeRole(u.role),
+    avatar,
+    profilePicture: u.profilePicture ?? '',
+    taskCount: u.taskCount ?? 0,
+    completedTasks: u.completedTasks ?? 0,
+    inProgressTasks: u.inProgressTasks ?? 0,
+    todoTasks: u.todoTasks ?? 0,
+    overdueTasks: u.overdueTasks ?? 0,
+    projectCount: u.projectCount ?? 0,
+  };
+}
 
 export async function GET() {
   try {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    invalidateCache();
-    const db = await readDB();
+    // Get all users from backend
+    const result = await proxyRequest('/users');
+    if (!result.ok) {
+      return NextResponse.json({ error: 'Failed to fetch users' }, { status: result.status });
+    }
 
-    const users = db.users.map((u) => {
-      const tasks = db.tasks.filter((t) => t.assignee === u.id);
-      const completed = tasks.filter((t) => t.status === 'completed').length;
-      const inProgress = tasks.filter((t) => t.status === 'in_progress').length;
-      const todo = tasks.filter((t) => t.status === 'todo').length;
-      const overdue = tasks.filter(
-        (t) => t.status !== 'completed' && new Date(t.dueDate) < new Date()
-      ).length;
-      const projects = db.projects.filter((p) => p.members.includes(u.id));
+    const raw = result.data as any;
+    const backendUsers: any[] = raw?.data?.data ?? raw?.data ?? raw?.users ?? [];
 
-      return {
-        id: u.id,
-        name: u.name,
-        email: u.email,
-        role: u.role,
-        avatar: u.avatar,
-        taskCount: tasks.length,
-        completedTasks: completed,
-        inProgressTasks: inProgress,
-        todoTasks: todo,
-        overdueTasks: overdue,
-        projectCount: projects.length,
-      };
+    // Enrich with workload from dashboard
+    const dashResult = await proxyRequest('/dashboard/insights');
+    const dashData = dashResult.ok ? (dashResult.data as any)?.data ?? dashResult.data : null;
+    const memberWorkload: any[] = dashData?.memberWorkloadSummary ?? [];
+
+    const users = backendUsers.map((u: any) => {
+      const workload = memberWorkload.find((m: any) => m.id === u.id);
+      return normalizeUser({
+        ...u,
+        taskCount: workload?.totalTasks ?? 0,
+        completedTasks: workload?.completedTasks ?? 0,
+        inProgressTasks: workload?.pendingTasks ?? 0,
+        todoTasks: workload?.todoTasks ?? 0,
+        overdueTasks: 0,
+        projectCount: u.projectIds?.length ?? 0,
+      });
     });
 
     return NextResponse.json({ users });
   } catch (err) {
-    console.error(err);
+    console.error('[GET /api/team]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -55,61 +72,27 @@ export async function POST(req: NextRequest) {
     if (!name || !email || !password || !role) {
       return NextResponse.json({ error: 'All fields (name, email, password, role) are required' }, { status: 400 });
     }
-    if (password.length < 6) {
-      return NextResponse.json({ error: 'Password must be at least 6 characters' }, { status: 400 });
+
+    const result = await proxyRequest('/users', {
+      method: 'POST',
+      body: {
+        name,
+        email,
+        password,
+        role: role.toUpperCase(),
+      },
+    });
+
+    const data = result.data as any;
+    if (!result.ok) {
+      const msg = data?.message ?? data?.error ?? 'Failed to create user';
+      return NextResponse.json({ error: msg }, { status: result.status });
     }
 
-    invalidateCache();
-    const db = await readDB();
-
-    const existing = db.users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-    if (existing) {
-      return NextResponse.json({ error: 'Email already in use' }, { status: 409 });
-    }
-
-    const initials = name
-      .split(' ')
-      .map((n: string) => n[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-
-    const newUser: User = {
-      id: generateId(),
-      name,
-      email,
-      passwordHash: password,
-      role,
-      avatar: initials || 'US',
-      createdAt: new Date().toISOString(),
-    };
-
-    db.users.push(newUser);
-
-    // Create an activity log
-    const log: ActivityLog = {
-      id: generateId(),
-      type: 'member_added',
-      message: `Admin ${session.name} created new team member "${name}" (${role})`,
-      userId: session.id,
-      createdAt: new Date().toISOString(),
-    };
-    db.activityLog.unshift(log);
-
-    await writeDB(db);
-
-    return NextResponse.json({
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        role: newUser.role,
-        avatar: newUser.avatar,
-      }
-    }, { status: 201 });
+    const user = data?.data ?? data;
+    return NextResponse.json({ user: normalizeUser(user) }, { status: 201 });
   } catch (err) {
-    console.error(err);
+    console.error('[POST /api/team]', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

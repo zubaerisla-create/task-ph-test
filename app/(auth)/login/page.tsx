@@ -3,9 +3,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { LogIn, Zap, Eye, EyeOff } from 'lucide-react';
+import { useTheme } from '@/app/_components/ThemeProvider';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { theme } = useTheme();
+  const logoSrc = theme === 'light' ? '/dark-logo-removebg-preview.png' : '/white-logo-removebg-preview.png';
+
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,9 +35,9 @@ export default function LoginPage() {
 
   const fillDemo = (role: 'admin' | 'pm' | 'member') => {
     const creds = {
-      admin: { email: 'admin@demo.com', password: 'demo1234' },
-      pm: { email: 'pm@demo.com', password: 'demo1234' },
-      member: { email: 'member1@demo.com', password: 'demo1234' },
+      admin: { email: 'admin@gmail.com', password: '123456' },
+      pm: { email: 'pm@gmail.com', password: '123456' },
+      member: { email: 'member@gmail.com', password: '123456' },
     };
     setForm(creds[role]);
     setError('');
@@ -43,11 +47,9 @@ export default function LoginPage() {
     <div className="animate-slide-up">
       {/* Logo */}
       <div className="text-center mb-8">
-        <div className="inline-flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-2xl gradient-primary flex items-center justify-center shadow-lg">
-            <Zap className="w-6 h-6 text-white" />
-          </div>
-          <span className="text-2xl font-bold gradient-text">CollabFlow</span>
+        <div className="flex flex-col items-center justify-center mb-4">
+          <img src={logoSrc} alt="Logo" className="h-16 w-auto object-contain mb-2" />
+          <span className="text-2xl font-bold gradient-text">Task Track</span>
         </div>
         <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
           Welcome back
@@ -95,9 +97,14 @@ export default function LoginPage() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2" style={{ color: 'var(--text-secondary)' }}>
-              Password
-            </label>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                Password
+              </label>
+              <Link href="/forgot-password" className="text-xs hover:underline animate-fade-in" style={{ color: 'oklch(75% 0.22 264)' }}>
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <input
                 id="login-password"

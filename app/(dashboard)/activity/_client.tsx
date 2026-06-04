@@ -9,7 +9,7 @@ import { formatDateTime, avatarColor } from '@/app/_lib/utils';
 
 interface Log {
   id: string; type: string; message: string; createdAt: string;
-  user: { name: string; avatar: string } | null;
+  user: { name: string; avatar: string; profilePicture?: string } | null;
 }
 
 function getIcon(type: string) {
@@ -81,9 +81,13 @@ export default function ActivityClient({ session }: { session: SessionUser }) {
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2">
                         {log.user && (
-                          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarColor(log.user.avatar)}`}>
-                            {log.user.avatar}
-                          </div>
+                          log.user.profilePicture ? (
+                            <img src={log.user.profilePicture} alt={log.user.name} className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                          ) : (
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ${avatarColor(log.user.avatar)}`}>
+                              {log.user.avatar}
+                            </div>
+                          )
                         )}
                         <p className="text-sm" style={{ color: 'var(--text-primary)' }}>{log.message}</p>
                       </div>

@@ -13,7 +13,7 @@ interface Project {
   status: ProjectStatus;
   taskCount: number;
   completedTasks: number;
-  members: { id: string; name: string; avatar: string }[];
+  members: { id: string; name: string; avatar: string; profilePicture?: string }[];
   createdAt: string;
 }
 
@@ -62,7 +62,7 @@ function ProjectForm({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay" onClick={onClose}>
-      <div className="w-full max-w-lg glass rounded-2xl p-6 animate-slide-up" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-lg glass rounded-2xl p-6 animate-slide-up max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-bold" style={{ color: 'var(--text-primary)' }}>
             {isEdit ? 'Edit Project' : 'Create New Project'}
@@ -227,8 +227,14 @@ export default function ProjectsClient({ session }: { session: SessionUser }) {
                 <div className="flex items-center justify-between">
                   <div className="flex -space-x-1.5">
                     {p.members.slice(0, 4).map((m) => (
-                      <div key={m.id} title={m.name} className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold ${avatarColor(m.avatar)}`} style={{ borderColor: 'var(--bg-surface)' }}>
-                        {m.avatar}
+                      <div key={m.id} title={m.name} className="relative w-7 h-7">
+                        {m.profilePicture ? (
+                          <img src={m.profilePicture} alt={m.name} className="w-7 h-7 rounded-full object-cover border-2" style={{ borderColor: 'var(--bg-surface)' }} />
+                        ) : (
+                          <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center text-white text-xs font-bold ${avatarColor(m.avatar)}`} style={{ borderColor: 'var(--bg-surface)' }}>
+                            {m.avatar}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {p.members.length > 4 && (
