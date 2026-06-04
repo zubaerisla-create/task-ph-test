@@ -90,7 +90,7 @@ export default function Sidebar({
 
         {/* User profile */}
         <div className="p-4 border-t border-base">
-          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'var(--bg-elevated)' }}>
+          <Link href="/profile" onClick={onClose} className="flex items-center gap-3 p-3 rounded-xl cursor-pointer hover:opacity-80 transition-opacity" style={{ background: 'var(--bg-elevated)' }}>
             {user.profilePicture ? (
               <img src={user.profilePicture} alt={user.name} className="w-9 h-9 rounded-xl object-cover flex-shrink-0" />
             ) : (
@@ -102,7 +102,7 @@ export default function Sidebar({
               <p className="text-sm font-semibold truncate" style={{ color: 'var(--text-primary)' }}>{user.name}</p>
               <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>{roleLabel(user.role)}</p>
             </div>
-          </div>
+          </Link>
         </div>
       </aside>
     </>

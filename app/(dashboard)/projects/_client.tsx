@@ -34,7 +34,7 @@ function ProjectForm({
     description: initial?.description ?? '',
     deadline: initial?.deadline ? initial.deadline.slice(0, 10) : '',
     status: initial?.status ?? 'active',
-    members: initial?.members.map((m) => m.id) ?? [],
+    members: initial?.members?.map((m) => m.id) ?? [],
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);

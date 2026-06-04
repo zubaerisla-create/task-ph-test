@@ -130,7 +130,7 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie data={data?.tasksByPriority} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
-                {data?.tasksByPriority.map((entry, i) => (
+                {data?.tasksByPriority?.map((entry, i) => (
                   <Cell key={i} fill={entry.fill} />
                 ))}
               </Pie>
@@ -146,7 +146,7 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie data={data?.tasksByStatus} cx="50%" cy="50%" innerRadius={55} outerRadius={80} paddingAngle={4} dataKey="value">
-                {data?.tasksByStatus.map((entry, i) => (
+                {data?.tasksByStatus?.map((entry, i) => (
                   <Cell key={i} fill={entry.fill} />
                 ))}
               </Pie>
@@ -177,7 +177,7 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
         <div className="surface rounded-2xl p-6 lg:col-span-1">
           <h3 className="font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>Project Progress</h3>
           <div className="space-y-4">
-            {data?.projectProgress.map((p) => (
+            {data?.projectProgress?.map((p) => (
               <div key={p.name}>
                 <div className="flex justify-between text-sm mb-2">
                   <span className="truncate font-medium" style={{ color: 'var(--text-primary)' }}>{p.name}</span>
@@ -229,10 +229,10 @@ export default function DashboardClient({ session }: { session: SessionUser }) {
             </h3>
           </div>
           <div className="space-y-3">
-            {data?.upcomingDeadlines.length === 0 && (
+            {(!data?.upcomingDeadlines || data.upcomingDeadlines.length === 0) && (
               <p className="text-sm" style={{ color: 'var(--text-muted)' }}>No upcoming deadlines 🎉</p>
             )}
-            {data?.upcomingDeadlines.map((t) => {
+            {data?.upcomingDeadlines?.map((t) => {
               const days = daysUntil(t.dueDate);
               const urgent = days <= 3;
               return (

@@ -107,7 +107,7 @@ export default function AnalyticsClient({ session }: { session: SessionUser }) {
               <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--text-muted)', fontSize: 12 }} />
               <Tooltip contentStyle={TOOLTIP} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]} name="Tasks">
-                {data?.tasksByPriority.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                {data?.tasksByPriority?.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
               </Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -119,7 +119,7 @@ export default function AnalyticsClient({ session }: { session: SessionUser }) {
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
               <Pie data={data?.tasksByStatus} cx="50%" cy="45%" innerRadius={65} outerRadius={95} paddingAngle={4} dataKey="value" label={({ name, percent }) => `${name} ${percent !== undefined ? (percent * 100).toFixed(0) : 0}%`} labelLine={false}>
-                {data?.tasksByStatus.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                {data?.tasksByStatus?.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
               </Pie>
               <Tooltip contentStyle={TOOLTIP} />
               <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: '12px', color: 'var(--text-secondary)' }} />

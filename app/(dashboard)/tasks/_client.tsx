@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Search, Filter, CheckCircle2, Clock, AlertCircle, Calendar, SortAsc, Trash2, Edit, X, Plus } from 'lucide-react';
 import type { SessionUser, TaskStatus, TaskPriority } from '@/app/_lib/types';
 import { formatDate, isOverdue, taskStatusLabel, daysUntil, avatarColor } from '@/app/_lib/utils';
@@ -17,6 +18,7 @@ interface Project { id: string; name: string; }
 const PAGE_SIZE = 10;
 
 export default function TasksClient({ session }: { session: SessionUser }) {
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -150,7 +152,11 @@ export default function TasksClient({ session }: { session: SessionUser }) {
                 {paginated.map((task) => {
                   const overdue = isOverdue(task.dueDate) && task.status !== 'completed';
                   return (
-                    <tr key={task.id} className="border-t border-base transition-colors" style={{ '--tw-bg-opacity': 1 } as any}
+                    <tr key={task.id} className="border-t border-base transition-colors cursor-pointer" style={{ '--tw-bg-opacity': 1 } as any}
+                      onClick={(e) => {
+                        if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) return;
+                        router.push(`/projects/${task.projectId}`);
+                      }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
                       onMouseLeave={(e) => (e.currentTarget.style.background = '')}>
                       <td className="px-5 py-4 max-w-[200px]">
@@ -205,7 +211,13 @@ export default function TasksClient({ session }: { session: SessionUser }) {
             {paginated.map((task) => {
               const overdue = isOverdue(task.dueDate) && task.status !== 'completed';
               return (
-                <div key={task.id} className="p-4 space-y-3">
+                <div key={task.id} className="p-4 space-y-3 cursor-pointer transition-colors"
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest('button') || (e.target as HTMLElement).closest('a')) return;
+                    router.push(`/projects/${task.projectId}`);
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.background = '')}>
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0">
                       <p className={`font-semibold text-sm ${task.status === 'completed' ? 'line-through opacity-60' : ''}`} style={{ color: 'var(--text-primary)' }}>
